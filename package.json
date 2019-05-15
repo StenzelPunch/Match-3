@@ -1,0 +1,24 @@
+{
+  "name": "match-3",
+  "version": "0.0.1",
+  "description": "test game on phaser.js 2.13.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel src/index.html --open",
+    "build": "parcel build src/index.html -d game --public-url ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StenzelPunch/Match-3.git"
+  },
+  "author": "Stenzel Punch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/StenzelPunch/Match-3/issues"
+  },
+  "homepage": "https://github.com/StenzelPunch/Match-3#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
+  }
+}
