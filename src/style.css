@@ -1,7 +1,14 @@
 @import url('https://fonts.googleapis.com/css?family=Fredoka+One');
 
-* {
+body {
     margin: 0;
     padding: 0;
+    background-color: rgb(143, 223, 255);
     font-family: 'Fredoka One', cursive;
+    color: #fff;
+}
+
+canvas {
+    display: block;
+    margin: 20px auto;
 }
