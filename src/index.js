@@ -13,7 +13,7 @@ const Height = 720;
 const TopBarHeight = 120;
 
 const game = new Phaser.Game(Width, Height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-const state = new Phaser.Stage(game)
+const state = new Phaser.StateManager(game)
 
 const gemsImaegs = []
 
@@ -25,7 +25,6 @@ state.gridWidth = Width;
 state.gridHeight = Height - TopBarHeight;
 state.selectedGem = null;
 
-console.log(state)
 
 function preload() {
     game.load.image('bg', bg);
@@ -46,10 +45,9 @@ function create() {
     background.angle += 90;
     const grid = new GemGrid(game, state)
     state.grid = grid;
-    grid.generateElements()
 }
 
 function update() {
     const grid = state.grid
-    grid.searchMatch()
+
 }

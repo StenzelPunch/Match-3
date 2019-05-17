@@ -13,6 +13,15 @@ export default class GemsGrid {
         this.selectedGem = null;
         this.content = []
 
+        for (let i = 0; i < this.rows; i++) {
+            const coll = [];
+            for (let j = 0; j < this.colls; j++) {
+
+                const gem = new SingleGem (this, i, j)
+                coll.push(gem)
+            }
+            this.content.push(coll);
+        }
     }
     get partWidth() {
         return this.width / this.colls;
@@ -20,81 +29,48 @@ export default class GemsGrid {
     get partHeight() {
         return this.height / this.rows;
     }
-    generateElements() {
-        for (let i = 0; i < this.rows; i++) {
-            const coll = [];
-            for (let j = 0; j < this.colls; j++) {
-
-                const x = this.partWidth * j + this.partWidth / 2
-                const y = this.partHeight * i  + this.partWidth / 2 + this.state.topBarHeight
-                const imageNumber = this.game.rnd.integerInRange(0, 5)
-
-                const shadow = this.game.add.sprite(x + 5, y + 5, 'shadow', 0)
-                const donut = this.game.add.sprite(x, y, this.images[imageNumber])
-
-                      shadow.scale.setTo(0.5 ,0.5);
-                      shadow.anchor.set(0.5);
-
-                const gemConfig = [
-                    i,
-                    j,
-                    this.images[imageNumber],
-                    this.partWidth,
-                    this.partHeight,
-                    shadow
-                ]
-
-                donut.data = new SingleGem (this.game, this.state, ...gemConfig);
-                donut.scale.setTo(0.5 ,0.5);
-                donut.anchor.set(0.5)
-                donut.inputEnabled = true;
-                donut.events.onInputDown.add(this.select, this)
-                coll.push(donut);
-            }
-            this.content.push(coll);
-        }
+    log(){
+        console.log(this);
     }
+    swap(e) {
+        console.log(e);
 
-    select(e) {
-        const oldSprite = this.selectedGem ? this.selectedGem : null
-        const oldPos    = oldSprite ? Object.assign({}, oldSprite.position) : null
-        const oldData   = oldSprite ? Object.assign({}, oldSprite.data) : null
+        const that = this.parent // call in SinglGem
+        const selected = this.selectedGem ? this.selectedGem : null
+        const selectedPos   = selected ? Object.assign({}, {coll: selected.data.coll, row: selected.data.row}) : null
 
-        const newSprite = e
-        const newPos    = Object.assign({}, newSprite.position)
-        const newData   = Object.assign({}, newSprite.data)
+        const target = e
+        const targetPos   = Object.assign({}, {coll: target.data.coll, row: target.data.row})
 
-
-        if (!this.selectedGem) {
+        if (!this.selectedGem) { // first click
             this.selectedGem = e
             changeScaleDonut(e, 0.6)
-        } else if (doesRangeTooBig(this, oldSprite, newSprite)) {
+        } else if (doesRangeTooBig(this, selected, target)) { //target is nit near
             changeScaleDonut(this.selectedGem, 0.5)
             this.selectedGem = null
-        } else if (this.selectedGem == e){
+        }  else if (this.selectedGem == e){ //same donut
             changeScaleDonut(e, 0.5)
             this.selectedGem = null
         } else {
-            oldSprite.data.row   = newData.row
-            oldSprite.data.coll  = newData.coll
-            newSprite.data.row   = oldData.row
-            newSprite.data.coll  = oldData.coll
-
-            this.content[oldData.row][oldData.coll] = newSprite;
-            this.content[newData.row][newData.coll] = oldSprite;
-
-            tweenDonut(oldSprite, newPos.x, newPos.y)
-            tweenDonut(newSprite, oldPos.x, oldPos.y)
+            selected.data.coll = targetPos.coll
+            selected.data.row  = targetPos.row
+            target.data.coll = selectedPos.coll
+            target.data.row = selectedPos.row
 
             changeScaleDonut(this.selectedGem, 0.5)
 
             this.selectedGem = null;
 
-            this.searchMatch()
+            // this.searchMatch()
 
 
         }
     }
+    /* generateElements() {
+
+    }
+
+
     searchMatch(){
         const array = this.content;
         const matches = []
@@ -133,23 +109,6 @@ export default class GemsGrid {
         sprite.destroy()
     }
 }
-
-function doesRangeTooBig(state, oldPos, newPos){
-    const newX = newPos.position.x,
-          newY = newPos.position.y,
-          oldX = oldPos.position.x,
-          oldY = oldPos.position.y,
-          gapX = state.partWidth,
-          gapY = state.partHeight
-    if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
-       return false
-    } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
-        return false
-    } else {
-        return true
-    }
-}
-
 const search = array => {
     const matches = []
     for (let row in array) {
@@ -174,7 +133,7 @@ const search = array => {
         }
         bufer = []
     }
-    return matches;
+    return matches; */
 }
 
 const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
@@ -189,4 +148,20 @@ const tweenDonut = (sprite, x, y) => {
 const changeScaleDonut = (target, x) => {
     target.scale.setTo(x)
     target.data.shadow.scale.setTo(x)
+}
+
+const doesRangeTooBig = (grid, oldPos, newPos) => {
+    const gapX = grid.partWidth,
+          gapY = grid.partHeight,
+          newX = newPos.x,
+          newY = newPos.y,
+          oldX = oldPos.x,
+          oldY = oldPos.y
+    if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
+       return false
+    } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
+        return false
+    } else {
+        return true
+    }
 }
