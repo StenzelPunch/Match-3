@@ -18,10 +18,10 @@ export default class GemsGrid {
             const coll = [];
             for (let j = 0; j < this.colls; j++) {
 
-                const x = this.partWidth * j + 5
-                const y = this.partHeight * i + 5 + this.state.topBarHeight
+                const x = this.partWidth * j + this.partWidth / 2
+                const y = this.partHeight * i  + this.partWidth / 2 + this.state.topBarHeight
                 // const shadow = this.game.add.sprite(x + 6, y + 6, 'shadow')
-                const donut = this.game.add.sprite(x, y, this.images[randomInteger(0, 5)])
+                const donut = this.game.add.sprite(x, y, this.images[this.game.rnd.integerInRange(0, 5)])
                 const gemConfig = [
                     i,
                     j,
@@ -32,7 +32,7 @@ export default class GemsGrid {
 
                 donut.data = new SingleGem (this.game, this.state, ...gemConfig);
                 donut.scale.setTo(0.5 ,0.5);
-                // shadow.scale.setTo(0.5, 0.5)
+                donut.anchor.set(0.5)
                 donut.inputEnabled = true;
                 donut.events.onInputDown.add(this.select, this)
                 coll.push(donut);
@@ -59,11 +59,17 @@ export default class GemsGrid {
 
         if (!this.selectedGem) {
             this.selectedGem = e
+            e.scale.setTo(0.6, 0.6)
+
+        } else if (this.selectedGem == e){
+            e.scale.setTo(0.5, 0.5)
+            this.selectedGem = null
         } else {
-            oldSprite.position.x = newPos.x
-            oldSprite.position.y = newPos.y
-            newSprite.position.x = oldPos.x
-            newSprite.position.y = oldPos.y
+            let tweenOld = this.game.add.tween(oldSprite).to( {x: newPos.x, y: newPos.y}, 1000, "Quart.easeOut");
+            let tweenNew = this.game.add.tween(newSprite).to( {x: oldPos.x, y: oldPos.y}, 1000, "Quart.easeOut");
+            this.selectedGem.scale.setTo(0.5, 0.5)
+            tweenOld.start()
+            tweenNew.start()
 
             oldSprite.data.row   = newData.row
             oldSprite.data.coll  = newData.coll
@@ -77,9 +83,3 @@ export default class GemsGrid {
         }
     }
 }
-
-function randomInteger(min, max) {
-    var rand = min - 0.5 + Math.random() * (max - min + 1)
-    rand = Math.round(rand);
-    return rand;
-  }
