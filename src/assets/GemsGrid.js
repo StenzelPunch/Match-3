@@ -20,12 +20,12 @@ export default class GemsGrid {
 
                 const x = this.partWidth * j + this.partWidth / 2
                 const y = this.partHeight * i  + this.partWidth / 2 + this.state.topBarHeight
-                // const shadow = this.game.add.sprite(x + 6, y + 6, 'shadow')
-                const donut = this.game.add.sprite(x, y, this.images[this.game.rnd.integerInRange(0, 5)])
+                const imageNumber = this.game.rnd.integerInRange(0, 5)
+                const donut = this.game.add.sprite(x, y, this.images[imageNumber])
                 const gemConfig = [
                     i,
                     j,
-                    this.images[randomInteger(0, 5)],
+                    this.images[imageNumber],
                     this.partWidth,
                     this.partHeight,
                 ]
@@ -61,6 +61,9 @@ export default class GemsGrid {
             this.selectedGem = e
             e.scale.setTo(0.6, 0.6)
 
+        } else if (doesRangeTooBig(this, oldSprite, newSprite)) {
+            this.selectedGem.scale.setTo(0.5, 0.5)
+            this.selectedGem = null
         } else if (this.selectedGem == e){
             e.scale.setTo(0.5, 0.5)
             this.selectedGem = null
@@ -81,5 +84,21 @@ export default class GemsGrid {
 
             this.selectedGem = null;
         }
+    }
+}
+
+function doesRangeTooBig(state, oldPos, newPos){
+    const newX = newPos.position.x,
+          newY = newPos.position.y,
+          oldX = oldPos.position.x,
+          oldY = oldPos.position.y,
+          gapX = state.partWidth,
+          gapY = state.partHeight
+    if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
+       return false
+    } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
+        return false
+    } else {
+        return true
     }
 }
