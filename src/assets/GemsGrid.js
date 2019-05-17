@@ -1,5 +1,4 @@
 import SingleGem from './SingleGem'
-// import gemsImages from './donuts'
 
 
 export default class GemsGrid {
@@ -14,6 +13,14 @@ export default class GemsGrid {
         this.selectedGem = null;
         this.content = []
 
+    }
+    get partWidth() {
+        return this.width / this.colls;
+    }
+    get partHeight() {
+        return this.height / this.rows;
+    }
+    generateElements() {
         for (let i = 0; i < this.rows; i++) {
             const coll = [];
             for (let j = 0; j < this.colls; j++) {
@@ -21,13 +28,20 @@ export default class GemsGrid {
                 const x = this.partWidth * j + this.partWidth / 2
                 const y = this.partHeight * i  + this.partWidth / 2 + this.state.topBarHeight
                 const imageNumber = this.game.rnd.integerInRange(0, 5)
+
+                const shadow = this.game.add.sprite(x + 5, y + 5, 'shadow', 0)
                 const donut = this.game.add.sprite(x, y, this.images[imageNumber])
+
+                      shadow.scale.setTo(0.5 ,0.5);
+                      shadow.anchor.set(0.5);
+
                 const gemConfig = [
                     i,
                     j,
                     this.images[imageNumber],
                     this.partWidth,
                     this.partHeight,
+                    shadow
                 ]
 
                 donut.data = new SingleGem (this.game, this.state, ...gemConfig);
@@ -39,12 +53,6 @@ export default class GemsGrid {
             }
             this.content.push(coll);
         }
-    }
-    get partWidth() {
-        return this.width / this.colls;
-    }
-    get partHeight() {
-        return this.height / this.rows;
     }
 
     select(e) {
@@ -60,19 +68,30 @@ export default class GemsGrid {
         if (!this.selectedGem) {
             this.selectedGem = e
             e.scale.setTo(0.6, 0.6)
+            e.data.shadow.scale.setTo(0.6, 0.6)
 
         } else if (doesRangeTooBig(this, oldSprite, newSprite)) {
             this.selectedGem.scale.setTo(0.5, 0.5)
+            this.selectedGem.data.shadow.scale.setTo(0.5, 0.5)
             this.selectedGem = null
         } else if (this.selectedGem == e){
             e.scale.setTo(0.5, 0.5)
+            e.data.shadow.scale.setTo(0.5, 0.5)
+
             this.selectedGem = null
         } else {
             let tweenOld = this.game.add.tween(oldSprite).to( {x: newPos.x, y: newPos.y}, 1000, "Quart.easeOut");
             let tweenNew = this.game.add.tween(newSprite).to( {x: oldPos.x, y: oldPos.y}, 1000, "Quart.easeOut");
+            let tweenOldShadow = this.game.add.tween(oldSprite.data.shadow).to( {x: newPos.x + 5, y: newPos.y + 5}, 1000, "Quart.easeOut");
+            let tweenNewShadow = this.game.add.tween(newSprite.data.shadow).to( {x: oldPos.x + 5, y: oldPos.y + 5}, 1000, "Quart.easeOut");
+
             this.selectedGem.scale.setTo(0.5, 0.5)
+            this.selectedGem.data.shadow.scale.setTo(0.5, 0.5)
+
             tweenOld.start()
             tweenNew.start()
+            tweenOldShadow.start()
+            tweenNewShadow.start()
 
             oldSprite.data.row   = newData.row
             oldSprite.data.coll  = newData.coll
@@ -83,8 +102,25 @@ export default class GemsGrid {
             this.content[newData.row][newData.coll] = oldSprite;
 
             this.selectedGem = null;
-            searchMatch(this.content)
+            this.searchMatch()
         }
+    }
+    searchMatch(){
+        const array = this.content;
+        const matches = []
+        matches.push(...search(array), ...search(transpose(array)))
+        matches.forEach(group => {
+            group.forEach(sprite => {
+                if (sprite.alive) {
+                    this.delleteSprite(sprite)
+                }
+            })
+        })
+        return matches != [] ? matches : false
+    }
+    delleteSprite(sprite) {
+        sprite.data.shadow.destroy()
+        sprite.destroy()
     }
 }
 
@@ -102,17 +138,6 @@ function doesRangeTooBig(state, oldPos, newPos){
     } else {
         return true
     }
-}
-
-function searchMatch(array){
-    const matches = []
-    matches.push(...search(array), ...search(transpose(array)))
-    matches.forEach(group => {
-        group.forEach(sprite => {
-            sprite.scale.setTo(0.2, 0.2)
-        })
-    })
-    return matches
 }
 
 const search = array => {

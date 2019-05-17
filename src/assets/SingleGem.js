@@ -1,5 +1,5 @@
 export default class singleGem {
-    constructor(game, state, row, coll, image, partWidth, partHeight) {
+    constructor(game, state, row, coll, image, partWidth, partHeight, shadow) {
         this.game = game;
         this.state = state;
         this.row = row;
@@ -7,6 +7,7 @@ export default class singleGem {
         this.image = image;
         this.partWidth = partWidth;
         this.partHeight = partHeight;
+        this.shadow = shadow
     }
 
     get x() {

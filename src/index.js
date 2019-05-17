@@ -44,8 +44,10 @@ function create() {
     background.angle += 90;
     const grid = new GemGrid(game, state)
     state.grid = grid;
+    grid.generateElements()
 }
 
 function update() {
-
+    const grid = state.grid
+    grid.searchMatch()
 }
