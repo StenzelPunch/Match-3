@@ -67,32 +67,14 @@ export default class GemsGrid {
 
         if (!this.selectedGem) {
             this.selectedGem = e
-            e.scale.setTo(0.6, 0.6)
-            e.data.shadow.scale.setTo(0.6, 0.6)
-
+            changeScaleDonut(e, 0.6)
         } else if (doesRangeTooBig(this, oldSprite, newSprite)) {
-            this.selectedGem.scale.setTo(0.5, 0.5)
-            this.selectedGem.data.shadow.scale.setTo(0.5, 0.5)
+            changeScaleDonut(this.selectedGem, 0.5)
             this.selectedGem = null
         } else if (this.selectedGem == e){
-            e.scale.setTo(0.5, 0.5)
-            e.data.shadow.scale.setTo(0.5, 0.5)
-
+            changeScaleDonut(e, 0.5)
             this.selectedGem = null
         } else {
-            let tweenOld = this.game.add.tween(oldSprite).to( {x: newPos.x, y: newPos.y}, 1000, "Quart.easeOut");
-            let tweenNew = this.game.add.tween(newSprite).to( {x: oldPos.x, y: oldPos.y}, 1000, "Quart.easeOut");
-            let tweenOldShadow = this.game.add.tween(oldSprite.data.shadow).to( {x: newPos.x + 5, y: newPos.y + 5}, 1000, "Quart.easeOut");
-            let tweenNewShadow = this.game.add.tween(newSprite.data.shadow).to( {x: oldPos.x + 5, y: oldPos.y + 5}, 1000, "Quart.easeOut");
-
-            this.selectedGem.scale.setTo(0.5, 0.5)
-            this.selectedGem.data.shadow.scale.setTo(0.5, 0.5)
-
-            tweenOld.start()
-            tweenNew.start()
-            tweenOldShadow.start()
-            tweenNewShadow.start()
-
             oldSprite.data.row   = newData.row
             oldSprite.data.coll  = newData.coll
             newSprite.data.row   = oldData.row
@@ -101,8 +83,16 @@ export default class GemsGrid {
             this.content[oldData.row][oldData.coll] = newSprite;
             this.content[newData.row][newData.coll] = oldSprite;
 
+            tweenDonut(oldSprite, newPos.x, newPos.y)
+            tweenDonut(newSprite, oldPos.x, oldPos.y)
+
+            changeScaleDonut(this.selectedGem, 0.5)
+
             this.selectedGem = null;
+
             this.searchMatch()
+
+
         }
     }
     searchMatch(){
@@ -112,11 +102,31 @@ export default class GemsGrid {
         matches.forEach(group => {
             group.forEach(sprite => {
                 if (sprite.alive) {
-                    this.delleteSprite(sprite)
+                    this.searchAllUnderSprite(sprite)
                 }
             })
         })
         return matches != [] ? matches : false
+    }
+    searchAllUnderSprite(sprite){
+        const under = []
+        for (let row in this.content) {
+            if (row < sprite.data.row) {
+                for (let coll in this.content[row]) {
+                    if (coll == sprite.data.coll) {
+                        if (this.content[row][coll].alive) {
+
+                        }
+
+
+
+                        // point.anchor.set(0.5)
+                    }
+                }
+            }
+        }
+        this.delleteSprite(sprite)
+        // console.log(under)
     }
     delleteSprite(sprite) {
         sprite.data.shadow.destroy()
@@ -168,3 +178,15 @@ const search = array => {
 }
 
 const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
+
+const tweenDonut = (sprite, x, y) => {
+    const tween = sprite.game.add.tween(sprite).to( {x: x, y: y}, 1000, "Quart.easeOut");
+    tween.start()
+    const tweenShadow = sprite.game.add.tween(sprite.data.shadow).to( {x: x + 5, y: y + 5}, 1000, "Quart.easeOut");
+    tweenShadow.start()
+}
+
+const changeScaleDonut = (target, x) => {
+    target.scale.setTo(x)
+    target.data.shadow.scale.setTo(x)
+}
