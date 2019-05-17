@@ -83,6 +83,7 @@ export default class GemsGrid {
             this.content[newData.row][newData.coll] = oldSprite;
 
             this.selectedGem = null;
+            searchMatch(this.content)
         }
     }
 }
@@ -102,3 +103,43 @@ function doesRangeTooBig(state, oldPos, newPos){
         return true
     }
 }
+
+function searchMatch(array){
+    const matches = []
+    matches.push(...search(array), ...search(transpose(array)))
+    matches.forEach(group => {
+        group.forEach(sprite => {
+            sprite.scale.setTo(0.2, 0.2)
+        })
+    })
+    return matches
+}
+
+const search = array => {
+    const matches = []
+    for (let row in array) {
+        let bufer = []
+        for (let coll in array[row]) {
+            if (bufer.length > 0) {
+                if (bufer[bufer.length - 1].key == array[row][coll].key) {
+                    bufer.push(array[row][coll])
+                    if (coll == array[row].length - 1 && bufer.length >= 3) {
+                        matches.push(bufer)
+                    }
+                } else {
+                    if (bufer.length >= 3) {
+                        matches.push(bufer)
+                    }
+                    bufer = []
+                    bufer.push(array[row][coll])
+                }
+            } else {
+                bufer.push(array[row][coll])
+            }
+        }
+        bufer = []
+    }
+    return matches;
+}
+
+const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
