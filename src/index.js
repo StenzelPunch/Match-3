@@ -4,6 +4,7 @@ window.Phaser = require('phaser-ce/build/custom/phaser-split');
 
 import bg from './assets/images/backgrounds/background.jpg';
 import gems from './assets/donuts'
+import point from './assets/images/particles/particle_ex1.png'
 import shadow from './assets/images/game/shadow.png'
 import GemGrid from './assets/GemsGrid'
 
@@ -12,23 +13,23 @@ const Height = 720;
 const TopBarHeight = 120;
 
 const game = new Phaser.Game(Width, Height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-const state = new Phaser.Stage(game)
+const state = new Phaser.StateManager(game)
 
 const gemsImaegs = []
 
-state.rows = 10;
-state.colls = 8;
+state.rows = 7;
+state.colls = 7;
 state.images = gemsImaegs;
 state.topBarHeight = TopBarHeight;
 state.gridWidth = Width;
 state.gridHeight = Height - TopBarHeight;
 state.selectedGem = null;
 
-console.log(state)
 
 function preload() {
     game.load.image('bg', bg);
     game.load.image('shadow', shadow);
+    game.load.image('point', point);
 
     for (let gem in gems) {
         game.load.image('gem-0' + gem, gems[gem])
@@ -47,5 +48,6 @@ function create() {
 }
 
 function update() {
+    const grid = state.grid
 
 }

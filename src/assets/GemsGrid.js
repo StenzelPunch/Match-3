@@ -1,5 +1,4 @@
 import SingleGem from './SingleGem'
-// import gemsImages from './donuts'
 
 
 export default class GemsGrid {
@@ -18,24 +17,8 @@ export default class GemsGrid {
             const coll = [];
             for (let j = 0; j < this.colls; j++) {
 
-                const x = this.partWidth * j + this.partWidth / 2
-                const y = this.partHeight * i  + this.partWidth / 2 + this.state.topBarHeight
-                const imageNumber = this.game.rnd.integerInRange(0, 5)
-                const donut = this.game.add.sprite(x, y, this.images[imageNumber])
-                const gemConfig = [
-                    i,
-                    j,
-                    this.images[imageNumber],
-                    this.partWidth,
-                    this.partHeight,
-                ]
-
-                donut.data = new SingleGem (this.game, this.state, ...gemConfig);
-                donut.scale.setTo(0.5 ,0.5);
-                donut.anchor.set(0.5)
-                donut.inputEnabled = true;
-                donut.events.onInputDown.add(this.select, this)
-                coll.push(donut);
+                const gem = new SingleGem (this, i, j)
+                coll.push(gem)
             }
             this.content.push(coll);
         }
@@ -46,55 +29,187 @@ export default class GemsGrid {
     get partHeight() {
         return this.height / this.rows;
     }
+    log(){
+        console.log(this);
+    }
+    swap(e) {
+        const selected = this.selectedGem ? this.selectedGem : null
+        const selectedPos   = selected ? Object.assign({}, {coll: selected.data.coll, row: selected.data.row}) : null
 
-    select(e) {
-        const oldSprite = this.selectedGem ? this.selectedGem : null
-        const oldPos    = oldSprite ? Object.assign({}, oldSprite.position) : null
-        const oldData   = oldSprite ? Object.assign({}, oldSprite.data) : null
+        const target = e
+        const targetPos   = Object.assign({}, {coll: target.data.coll, row: target.data.row})
 
-        const newSprite = e
-        const newPos    = Object.assign({}, newSprite.position)
-        const newData   = Object.assign({}, newSprite.data)
-
-
-        if (!this.selectedGem) {
+        if (!this.selectedGem) { // first click
             this.selectedGem = e
-            e.scale.setTo(0.6, 0.6)
-
-        } else if (doesRangeTooBig(this, oldSprite, newSprite)) {
-            this.selectedGem.scale.setTo(0.5, 0.5)
+            changeScaleDonut(e, 0.6)
+        } /* else if (doesRangeTooBig(this, selected, target)) { //target is nit near
+            console.log(selected)
+            console.log(target)
+            changeScaleDonut(this.selectedGem, 0.5)
             this.selectedGem = null
-        } else if (this.selectedGem == e){
-            e.scale.setTo(0.5, 0.5)
+        } */  else if (this.selectedGem == e){ //same donut
+            changeScaleDonut(e, 0.5)
             this.selectedGem = null
         } else {
-            let tweenOld = this.game.add.tween(oldSprite).to( {x: newPos.x, y: newPos.y}, 1000, "Quart.easeOut");
-            let tweenNew = this.game.add.tween(newSprite).to( {x: oldPos.x, y: oldPos.y}, 1000, "Quart.easeOut");
-            this.selectedGem.scale.setTo(0.5, 0.5)
-            tweenOld.start()
-            tweenNew.start()
+            selected.data.coll = targetPos.coll
+                selected.data.row  = targetPos.row
+                target.data.coll = selectedPos.coll
+                target.data.row = selectedPos.row
+            changePosInGrid(selected, targetPos)
+            changePosInGrid(target, selectedPos)
 
-            oldSprite.data.row   = newData.row
-            oldSprite.data.coll  = newData.coll
-            newSprite.data.row   = oldData.row
-            newSprite.data.coll  = oldData.coll
 
-            this.content[oldData.row][oldData.coll] = newSprite;
-            this.content[newData.row][newData.coll] = oldSprite;
+            changeScaleDonut(this.selectedGem, 0.5)
 
             this.selectedGem = null;
-            searchMatch(this.content)
+
+            this.searchMatch()
+
+
+
+
+        }
+    }
+
+    searchMatch(option){
+        const array = this.content;
+        const matches = []
+        matches.push(...search(array), ...search(transpose(array)))
+
+
+        if (!option && matches !== []) {
+            this.destroyMatches(matches)
+        } else {
+            return matches
+        }
+
+        const mask = arrMask(this.content)
+        console.group()
+        console.info('1')
+        console.table(mask)
+        console.groupEnd()
+        this.moveDown()
+        this.spawnNew()
+    }
+    destroyMatches(matches) {
+        matches.forEach(group => {
+            group.forEach(single => {
+                this.content[single.row][single.coll] = null
+                single.destroy()
+            })
+        })
+    }
+
+    moveDown() {
+
+        const arr = this.content
+        for (let r = arr.length - 1; r >= 0; r--) {
+            for (let c = arr[r].length - 1; c >= 0; c--) {
+                if (arr[r][c] === null) {
+                    if (arr[r - 1]) {
+                        if (arr[r - 1][c]){
+                            arr[r][c] = arr[r - 1][c]
+                            arr[r][c].row = r
+                            arr[r - 1][c] = null
+                        } else {
+                            for (let subR = r; subR >= 0; subR--) {
+                                if (arr[subR]){
+                                    if (arr[subR][c] === null) {
+                                        // if (arr[subR - 1][c] === null) {
+                                        //     console.log('null up', subR, c)
+                                        // } else {
+                                        //     console.log('up', subR, c)
+                                        // }
+                                    } else if (arr[subR][c] !== null) {
+                                        arr[r][c] = arr[subR][c]
+                                        arr[r][c].row = r
+                                        arr[subR][c] = null
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    } else if (arr[r - 1] === null) {
+
+                    } else if (arr[r - 1] === undefined) {
+
+                    }
+                }
+            }
+        }
+        const mask = arrMask(this.content)
+        console.group()
+        console.info('1')
+        console.table(mask)
+        console.groupEnd()
+    }
+    spawnNew() {
+        for (let row in this.content) {
+            for (let coll in this.content[row]) {
+                if (this.content[row][coll] === null) {
+                    this.content[row][coll] = new SingleGem(this, row, coll).spawn()
+                }
+            }
         }
     }
 }
 
-function doesRangeTooBig(state, oldPos, newPos){
-    const newX = newPos.position.x,
-          newY = newPos.position.y,
-          oldX = oldPos.position.x,
-          oldY = oldPos.position.y,
-          gapX = state.partWidth,
-          gapY = state.partHeight
+
+const search = array => {
+    const matches = []
+    for (let row in array) {
+        let bufer = []
+        for (let coll in array[row]) {
+            if (array[row][coll]) {
+                if (bufer.length > 0) {
+                    if (array[row][coll] != null && array[row][coll] != 'target' && bufer[bufer.length - 1].gem.key == array[row][coll].gem.key) {
+                        bufer.push(array[row][coll])
+                        if (coll == array[row].length - 1 && bufer.length >= 3) {
+                            matches.push(bufer)
+                        }
+                    } else {
+                        if (bufer.length >= 3) {
+                            matches.push(bufer)
+                        }
+                        bufer = []
+                        bufer.push(array[row][coll])
+                    }
+                } else {
+                    bufer.push(array[row][coll])
+                }
+            } else {
+                if (bufer.length >= 3) {
+                    matches.push(bufer)
+                }
+                bufer = []
+            }
+        }
+        bufer = []
+    }
+    return matches;
+}
+
+const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
+
+const tweenDonut = (sprite, x, y) => {
+    const tween = sprite.game.add.tween(sprite).to( {x: x, y: y}, 1000, "Quart.easeOut");
+    tween.start()
+    const tweenShadow = sprite.game.add.tween(sprite.data.shadow).to( {x: x + 5, y: y + 5}, 1000, "Quart.easeOut");
+    tweenShadow.start()
+}
+
+const changeScaleDonut = (target, x) => {
+    target.scale.setTo(x)
+    target.data.shadow.scale.setTo(x)
+}
+
+const doesRangeTooBig = (grid, oldPos, newPos) => {
+    const gapX = grid.partWidth,
+          gapY = grid.partHeight,
+          newX = newPos.x,
+          newY = newPos.y,
+          oldX = oldPos.x,
+          oldY = oldPos.y
     if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
        return false
     } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
@@ -104,42 +219,43 @@ function doesRangeTooBig(state, oldPos, newPos){
     }
 }
 
-function searchMatch(array){
-    const matches = []
-    matches.push(...search(array), ...search(transpose(array)))
-    matches.forEach(group => {
-        group.forEach(sprite => {
-            sprite.scale.setTo(0.2, 0.2)
-        })
-    })
-    return matches
+const changePosInGrid = (e, targetPos) => {
+    e.data.parent.content[targetPos.row][targetPos.coll] = e.data
 }
 
-const search = array => {
-    const matches = []
-    for (let row in array) {
-        let bufer = []
-        for (let coll in array[row]) {
-            if (bufer.length > 0) {
-                if (bufer[bufer.length - 1].key == array[row][coll].key) {
-                    bufer.push(array[row][coll])
-                    if (coll == array[row].length - 1 && bufer.length >= 3) {
-                        matches.push(bufer)
-                    }
-                } else {
-                    if (bufer.length >= 3) {
-                        matches.push(bufer)
-                    }
-                    bufer = []
-                    bufer.push(array[row][coll])
-                }
-            } else {
-                bufer.push(array[row][coll])
+const arrMask = arr => {
+    const arrMask = arr.map(row => row.map(coll => {
+        let color = ''
+        if (coll !== null && coll !== undefined && coll != 'target') {
+            switch (coll.gem.key) {
+                case 'gem-00':
+                    color = 'К'
+                    break;
+                case 'gem-01':
+                    color = 'C'
+                    break;
+                case 'gem-02':
+                    color = 'З'
+                    break;
+                case 'gem-03':
+                    color = 'Г'
+                    break;
+                case 'gem-04':
+                    color = 'Ж'
+                    break;
+                case 'gem-05':
+                    color = 'Р'
+                    break;
+                default:
+                    break;
             }
+            return color
+        } else if (coll === 'target') {
+            return 1
+        } else {
+            return 0
         }
-        bufer = []
-    }
-    return matches;
-}
 
-const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
+    }))
+    return arrMask
+}
