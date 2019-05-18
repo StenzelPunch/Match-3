@@ -17,8 +17,8 @@ const state = new Phaser.StateManager(game)
 
 const gemsImaegs = []
 
-state.rows = 5;
-state.colls = 5;
+state.rows = 7;
+state.colls = 7;
 state.images = gemsImaegs;
 state.topBarHeight = TopBarHeight;
 state.gridWidth = Width;

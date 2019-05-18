@@ -66,4 +66,21 @@ export default class SingleGem {
         const tweenShadow = this.game.add.tween(this.shadow).to( {y: y + 5}, 1000, "Quart.easeOut");
         tweenShadow.start()
     }
+    destroy() {
+        const destroyShadow = this.parent.game.add.tween(this.shadow.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
+        const destroyGem = this.parent.game.add.tween(this.gem.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
+        destroyShadow.onComplete.add(() => {this.shadow.destroy()}, this)
+        destroyGem.onComplete.add(() => {this.gem.destroy()}, this)
+        destroyShadow.start()
+        destroyGem.start()
+    }
+    spawn() {
+        this.shadow.position.y = 0
+        this.gem.position.y = 0
+        const spawnShadow = this.parent.game.add.tween(this.shadow).to({ y: this.y + 5}, 1100, "Quart.easeOut")
+        const spawnGem = this.parent.game.add.tween(this.gem).to({ y: this.y }, 1100, "Quart.easeOut")
+        spawnShadow.start()
+        spawnGem.start()
+        return this
+    }
 }
