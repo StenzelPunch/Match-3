@@ -29,6 +29,7 @@ const Game = class Game {
     update() {
         if (this.playClicked) {
             this.state.start('game')
+            this.playClicked = false
         }
     }
     clickHandler() {

@@ -17,7 +17,6 @@ const Game = class Game {
     create() {
         const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'bg');
         background.height = gridConfig.gameHeight;
-        console.log(background.height)
         background.scale.x = background.scale.y
         background.anchor.set(0.5)
 
@@ -51,10 +50,12 @@ const Game = class Game {
         this.textTime.text = "  Time left: " + this.timeLeft.t
     }
     updateTime(){
-        if (this.timeLeft) {
+        if (this.timeLeft.t) {
             this.timeLeft.t--
         } else {
-            console.log('time left')
+            this.timerStarted = false
+            this.timeLeft.t = 10
+            this.state.start('game-over')
         }
     }
 }

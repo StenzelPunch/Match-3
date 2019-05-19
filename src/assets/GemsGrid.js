@@ -117,9 +117,7 @@ export default class GemsGrid {
             }
         }
         const spritesToSwap = []
-
             this.content.forEach(row => {
-                // console.log(row)
                 row.forEach(col => {
                     if (col) {
                         spritesToSwap.push(...col.swap())

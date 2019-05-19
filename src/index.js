@@ -5,7 +5,6 @@ window.Phaser = require('phaser-ce/build/custom/phaser-split');
 import gridConfig from './assets/gridConfig'
 
 
-import Boot from './scenes/Boot'
 import Preload from './scenes/Preload'
 import StartScreen from './scenes/StartScreen'
 import Game from './scenes/Game'
@@ -52,5 +51,6 @@ gridConfig.game = game
 game.state.add('preload', Preload);
 game.state.add('start-screen', StartScreen);
 game.state.add('game', Game);
+game.state.add('game-over', GameOver);
 
 game.state.start('preload');
