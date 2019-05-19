@@ -11,6 +11,8 @@ export default class GemsGrid {
         this.gridConfig = gridConfig;
         this.selectedGem = null;
         this.content = []
+        this.score = 0
+        this.timeLeft = {t: 60}
 
         for (let i = 0; i < this.rows; i++) {
             const col = [];
@@ -72,6 +74,7 @@ export default class GemsGrid {
 
         if (matches.length !== 0) {
             this.destroyMatches(matches)
+            this.timeLeft.t += 2
         }
     }
 
@@ -81,6 +84,7 @@ export default class GemsGrid {
             group.forEach(single => {
                 this.content[single.row][single.col] = null
                 spritesToDestroy.push(...single.destroy())
+                this.score += 10
             })
         })
         callTweens(spritesToDestroy, this.moveDown, this)
