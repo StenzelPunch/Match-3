@@ -18,7 +18,7 @@ const state = new Phaser.StateManager(game)
 const gemsImaegs = []
 
 state.rows = 7;
-state.colls = 7;
+state.cols = 7;
 state.images = gemsImaegs;
 state.topBarHeight = TopBarHeight;
 state.gridWidth = Width;
@@ -45,9 +45,9 @@ function create() {
     background.angle += 90;
     const grid = new GemGrid(game, state)
     state.grid = grid;
+    // grid.searchMatch()
 }
 
 function update() {
-    const grid = state.grid
-
+    // state.grid.loop()
 }
