@@ -1,14 +1,14 @@
 import SingleGem from './SingleGem'
 
 export default class GemsGrid {
-    constructor(game, state) {
-        this.width = state.gridWidth;
-        this.height = state.gridHeight;
-        this.rows = state.rows;
-        this.cols = state.cols;
-        this.images = state.images;
+    constructor(game, gridConfig) {
+        this.width = gridConfig.gridWidth;
+        this.height = gridConfig.gridHeight;
+        this.rows = gridConfig.rows;
+        this.cols = gridConfig.cols;
+        this.images = gridConfig.images;
         this.game = game;
-        this.state = state;
+        this.gridConfig = gridConfig;
         this.selectedGem = null;
         this.content = []
 

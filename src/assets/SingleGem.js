@@ -6,17 +6,17 @@ export default class SingleGem {
         this.shadow = this.createGemShadow()
         this.gem = this.createGem()
     }
-    get state () {
-        return this.parent.state
+    get gridConfig () {
+        return this.parent.gridConfig
     }
     get game() {
-        return this.parent.state.game
+        return this.parent.gridConfig.game
     }
     get x() {
         return this.parent.partWidth * this.col + this.parent.partWidth / 2;
     }
     get y() {
-        return this.parent.partHeight * this.row  + this.parent.partHeight / 2 + this.state.topBarHeight
+        return this.parent.partHeight * this.row  + this.parent.partHeight / 2 + this.gridConfig.topBarHeight
     }
     get row() {
         return this._row
@@ -26,7 +26,7 @@ export default class SingleGem {
     }
     set row(newRow) {
         this._row = newRow
-        // this.tweenY(this.parent.partHeight * this.row + this.parent.partHeight / 2 + this.state.topBarHeight)
+        // this.tweenY(this.parent.partHeight * this.row + this.parent.partHeight / 2 + this.gridConfig.topBarHeight)
     }
 
     set col(newСol) {
@@ -35,8 +35,8 @@ export default class SingleGem {
     }
 
     createGem () {
-        const imageNumber = this.state.game.rnd.integerInRange(0, 5)
-        const donut = this.game.add.sprite(this.x, this.y, this.state.images[imageNumber])
+        const imageNumber = this.gridConfig.game.rnd.integerInRange(0, 5)
+        const donut = this.game.add.sprite(this.x, this.y, this.gridConfig.images[imageNumber])
         donut.data = this
         donut.scale.setTo(0.5);
         donut.anchor.set(0.5)
