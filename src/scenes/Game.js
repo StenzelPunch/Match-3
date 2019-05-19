@@ -11,9 +11,6 @@ const Game = class Game {
         this.timer = null
         this.timerStarted = false;
     }
-    preload() {
-
-    }
     create() {
         const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'bg');
         background.height = gridConfig.gameHeight;
@@ -55,7 +52,7 @@ const Game = class Game {
         } else {
             this.timerStarted = false
             this.timeLeft.t = 10
-            this.state.start('game-over')
+            this.state.start('game-over', true, false, this.grid.score)
         }
     }
 }
