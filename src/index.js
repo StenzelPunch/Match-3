@@ -31,6 +31,12 @@ const gemsImaegs = []
 
 const game = new Phaser.Game(Width, Height, Phaser.WEBGL, '');
 
+WebFont.load({
+    google: {
+      families: ['Fredoka One']
+    }
+});
+
 gridConfig.rows = 7;
 gridConfig.cols = 7;
 gridConfig.images = gemsImaegs;
