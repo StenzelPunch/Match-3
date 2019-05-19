@@ -1,107 +1,96 @@
 import SingleGem from './SingleGem'
 
-
 export default class GemsGrid {
-    constructor(game, state) {
-        this.width = state.gridWidth;
-        this.height = state.gridHeight;
-        this.rows = state.rows;
-        this.colls = state.colls;
-        this.images = state.images;
+    constructor(game, gridConfig) {
+        this.width = gridConfig.gridWidth;
+        this.height = gridConfig.gridHeight;
+        this.rows = gridConfig.rows;
+        this.cols = gridConfig.cols;
+        this.images = gridConfig.images;
         this.game = game;
-        this.state = state;
+        this.gridConfig = gridConfig;
         this.selectedGem = null;
         this.content = []
+        this.score = 0
+        this.timeLeft = {t: 60}
 
         for (let i = 0; i < this.rows; i++) {
-            const coll = [];
-            for (let j = 0; j < this.colls; j++) {
+            const col = [];
+            for (let j = 0; j < this.cols; j++) {
 
                 const gem = new SingleGem (this, i, j)
-                coll.push(gem)
+                col.push(gem)
             }
-            this.content.push(coll);
+            this.content.push(col);
         }
     }
     get partWidth() {
-        return this.width / this.colls;
+        return Math.floor(this.width / this.cols);
     }
     get partHeight() {
-        return this.height / this.rows;
+        return Math.floor(this.height / this.rows);
     }
     log(){
         console.log(this);
     }
     swap(e) {
         const selected = this.selectedGem ? this.selectedGem : null
-        const selectedPos   = selected ? Object.assign({}, {coll: selected.data.coll, row: selected.data.row}) : null
+        const selectedPos   = selected ? Object.assign({}, {col: selected.data.col, row: selected.data.row}) : null
 
         const target = e
-        const targetPos   = Object.assign({}, {coll: target.data.coll, row: target.data.row})
+        const targetPos   = Object.assign({}, {col: target.data.col, row: target.data.row})
 
-        if (!this.selectedGem) { // first click
+        if (!this.selectedGem) {
             this.selectedGem = e
             changeScaleDonut(e, 0.6)
-        } /* else if (doesRangeTooBig(this, selected, target)) { //target is nit near
-            console.log(selected)
-            console.log(target)
+        } else if (doesRangeTooBig(this, selected, target)) {
             changeScaleDonut(this.selectedGem, 0.5)
             this.selectedGem = null
-        } */  else if (this.selectedGem == e){ //same donut
+        }  else if (this.selectedGem == e){
             changeScaleDonut(e, 0.5)
             this.selectedGem = null
         } else {
-            selected.data.coll = targetPos.coll
-                selected.data.row  = targetPos.row
-                target.data.coll = selectedPos.coll
-                target.data.row = selectedPos.row
+            selected.data.col = targetPos.col
+            selected.data.row  = targetPos.row
+            target.data.col = selectedPos.col
+            target.data.row = selectedPos.row
+
+
             changePosInGrid(selected, targetPos)
             changePosInGrid(target, selectedPos)
-
-
             changeScaleDonut(this.selectedGem, 0.5)
 
-            this.selectedGem = null;
-
-            this.searchMatch()
-
-
-
-
+            const spritesToSwap = []
+            spritesToSwap.push(...selected.data.swap(), ...target.data.swap())
+            callTweens(spritesToSwap, this.searchMatch, this)
+            this.selectedGem = null
         }
     }
 
-    searchMatch(option){
+    searchMatch(){
         const array = this.content;
         const matches = []
         matches.push(...search(array), ...search(transpose(array)))
 
-
-        if (!option && matches !== []) {
+        if (matches.length !== 0) {
             this.destroyMatches(matches)
-        } else {
-            return matches
+            this.timeLeft.t += 2
         }
-
-        const mask = arrMask(this.content)
-        console.group()
-        console.info('1')
-        console.table(mask)
-        console.groupEnd()
-        this.moveDown()
-        this.spawnNew()
     }
+
     destroyMatches(matches) {
+        let spritesToDestroy = []
         matches.forEach(group => {
             group.forEach(single => {
-                this.content[single.row][single.coll] = null
-                single.destroy()
+                this.content[single.row][single.col] = null
+                spritesToDestroy.push(...single.destroy())
+                this.score += 10
             })
         })
+        callTweens(spritesToDestroy, this.moveDown, this)
     }
 
     moveDown() {
-
         const arr = this.content
         for (let r = arr.length - 1; r >= 0; r--) {
             for (let c = arr[r].length - 1; c >= 0; c--) {
@@ -114,13 +103,7 @@ export default class GemsGrid {
                         } else {
                             for (let subR = r; subR >= 0; subR--) {
                                 if (arr[subR]){
-                                    if (arr[subR][c] === null) {
-                                        // if (arr[subR - 1][c] === null) {
-                                        //     console.log('null up', subR, c)
-                                        // } else {
-                                        //     console.log('up', subR, c)
-                                        // }
-                                    } else if (arr[subR][c] !== null) {
+                                    if (arr[subR][c] !== null) {
                                         arr[r][c] = arr[subR][c]
                                         arr[r][c].row = r
                                         arr[subR][c] = null
@@ -129,42 +112,45 @@ export default class GemsGrid {
                                 }
                             }
                         }
-                    } else if (arr[r - 1] === null) {
-
-                    } else if (arr[r - 1] === undefined) {
-
                     }
                 }
             }
         }
-        const mask = arrMask(this.content)
-        console.group()
-        console.info('1')
-        console.table(mask)
-        console.groupEnd()
+        const spritesToSwap = []
+            this.content.forEach(row => {
+                row.forEach(col => {
+                    if (col) {
+                        spritesToSwap.push(...col.swap())
+                    }
+                })
+            })
+            callTweens(spritesToSwap, this.spawnNew, this)
     }
+
     spawnNew() {
+        const spritesToSpawn = []
         for (let row in this.content) {
-            for (let coll in this.content[row]) {
-                if (this.content[row][coll] === null) {
-                    this.content[row][coll] = new SingleGem(this, row, coll).spawn()
+            for (let col in this.content[row]) {
+                if (this.content[row][col] === null) {
+                    this.content[row][col] = new SingleGem(this, row, col)
+                    spritesToSpawn.push(...this.content[row][col].spawn())
                 }
             }
         }
+        callTweens(spritesToSpawn, this.searchMatch, this)
     }
 }
-
 
 const search = array => {
     const matches = []
     for (let row in array) {
         let bufer = []
-        for (let coll in array[row]) {
-            if (array[row][coll]) {
+        for (let col in array[row]) {
+            if (array[row][col]) {
                 if (bufer.length > 0) {
-                    if (array[row][coll] != null && array[row][coll] != 'target' && bufer[bufer.length - 1].gem.key == array[row][coll].gem.key) {
-                        bufer.push(array[row][coll])
-                        if (coll == array[row].length - 1 && bufer.length >= 3) {
+                    if (array[row][col] != null && array[row][col] != 'target' && bufer[bufer.length - 1].gem.key == array[row][col].gem.key) {
+                        bufer.push(array[row][col])
+                        if (col == array[row].length - 1 && bufer.length >= 3) {
                             matches.push(bufer)
                         }
                     } else {
@@ -172,10 +158,10 @@ const search = array => {
                             matches.push(bufer)
                         }
                         bufer = []
-                        bufer.push(array[row][coll])
+                        bufer.push(array[row][col])
                     }
                 } else {
-                    bufer.push(array[row][coll])
+                    bufer.push(array[row][col])
                 }
             } else {
                 if (bufer.length >= 3) {
@@ -191,25 +177,31 @@ const search = array => {
 
 const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
 
-const tweenDonut = (sprite, x, y) => {
-    const tween = sprite.game.add.tween(sprite).to( {x: x, y: y}, 1000, "Quart.easeOut");
-    tween.start()
-    const tweenShadow = sprite.game.add.tween(sprite.data.shadow).to( {x: x + 5, y: y + 5}, 1000, "Quart.easeOut");
-    tweenShadow.start()
-}
-
 const changeScaleDonut = (target, x) => {
     target.scale.setTo(x)
     target.data.shadow.scale.setTo(x)
 }
 
+const callTweens = (tweens, callback, context) => {
+    let tweenStack = tweens.length
+    tweens.forEach(tween => {
+        tween.onComplete.add(() => {
+            tweenStack--
+            if (tweenStack === 0) {
+                callback.call(context)
+            }
+        }, context)
+        tween.start()
+    })
+}
+
 const doesRangeTooBig = (grid, oldPos, newPos) => {
     const gapX = grid.partWidth,
           gapY = grid.partHeight,
-          newX = newPos.x,
-          newY = newPos.y,
-          oldX = oldPos.x,
-          oldY = oldPos.y
+          newX = newPos.position.x,
+          newY = newPos.position.y,
+          oldX = oldPos.position.x,
+          oldY = oldPos.position.y
     if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
        return false
     } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
@@ -220,42 +212,5 @@ const doesRangeTooBig = (grid, oldPos, newPos) => {
 }
 
 const changePosInGrid = (e, targetPos) => {
-    e.data.parent.content[targetPos.row][targetPos.coll] = e.data
-}
-
-const arrMask = arr => {
-    const arrMask = arr.map(row => row.map(coll => {
-        let color = ''
-        if (coll !== null && coll !== undefined && coll != 'target') {
-            switch (coll.gem.key) {
-                case 'gem-00':
-                    color = 'К'
-                    break;
-                case 'gem-01':
-                    color = 'C'
-                    break;
-                case 'gem-02':
-                    color = 'З'
-                    break;
-                case 'gem-03':
-                    color = 'Г'
-                    break;
-                case 'gem-04':
-                    color = 'Ж'
-                    break;
-                case 'gem-05':
-                    color = 'Р'
-                    break;
-                default:
-                    break;
-            }
-            return color
-        } else if (coll === 'target') {
-            return 1
-        } else {
-            return 0
-        }
-
-    }))
-    return arrMask
+    e.data.parent.content[targetPos.row][targetPos.col] = e.data
 }

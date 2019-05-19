@@ -1,47 +1,47 @@
 export default class SingleGem {
-    constructor(parent, row, coll) {
+    constructor(parent, row, col) {
         this.parent = parent;
         this._row = row
-        this._coll = coll
+        this._col = col
         this.shadow = this.createGemShadow()
         this.gem = this.createGem()
     }
-    get state () {
-        return this.parent.state
+    get gridConfig () {
+        return this.parent.gridConfig
     }
     get game() {
-        return this.parent.state.game
+        return this.parent.gridConfig.game
     }
     get x() {
-        return this.parent.partWidth * this.coll + this.parent.partWidth / 2;
+        return this.parent.partWidth * this.col + this.parent.partWidth / 2;
     }
     get y() {
-        return this.parent.partHeight * this.row  + this.parent.partHeight / 2 + this.state.topBarHeight
+        return this.parent.partHeight * this.row  + this.parent.partHeight / 2 + this.gridConfig.topBarHeight
     }
     get row() {
         return this._row
     }
-    get coll() {
-        return this._coll
+    get col() {
+        return this._col
     }
     set row(newRow) {
         this._row = newRow
-        this.tweenY(this.y)
+        // this.tweenY(this.parent.partHeight * this.row + this.parent.partHeight / 2 + this.gridConfig.topBarHeight)
     }
 
-    set coll(newColl) {
-        this._coll = newColl
-        this.tweenX(this.x)
+    set col(newСol) {
+        this._col = newСol
+        // this.tweenX(this.parent.partWidth * this.col + this.parent.partWidth / 2)
     }
 
     createGem () {
-        const imageNumber = this.state.game.rnd.integerInRange(0, 5)
-        const donut = this.game.add.sprite(this.x, this.y, this.state.images[imageNumber])
+        const imageNumber = this.gridConfig.game.rnd.integerInRange(0, 5)
+        const donut = this.game.add.sprite(this.x, this.y, this.gridConfig.images[imageNumber])
         donut.data = this
         donut.scale.setTo(0.5);
         donut.anchor.set(0.5)
         donut.inputEnabled = true;
-        donut.events.onInputDown.add(this.swap, this)
+        donut.events.onInputDown.add(this.click, this)
         return donut
     }
     createGemShadow () {
@@ -51,36 +51,24 @@ export default class SingleGem {
         shadow.data = this
         return shadow
     }
-    swap(e){
+    click(e){
         this.parent.swap.call(this.parent, e)
     }
-    tweenX(x) {
-        const tween = this.game.add.tween(this.gem).to( {x: x}, 1000, "Quart.easeOut");
-        tween.start()
-        const tweenShadow = this.game.add.tween(this.shadow).to( {x: x + 5}, 1000, "Quart.easeOut");
-        tweenShadow.start()
-    }
-    tweenY(y) {
-        const tween = this.game.add.tween(this.gem).to( {y: y}, 1000, "Quart.easeOut");
-        tween.start()
-        const tweenShadow = this.game.add.tween(this.shadow).to( {y: y + 5}, 1000, "Quart.easeOut");
-        tweenShadow.start()
+    swap() {
+        const tweenX = this.game.add.tween(this.gem).to( {x: this.x}, 300, "Quart.easeOut");
+        const tweenY = this.game.add.tween(this.gem).to( {y: this.y}, 300, "Quart.easeOut");
+        const tweenShadowX = this.game.add.tween(this.shadow).to( {x: this.x + 5}, 300, "Quart.easeOut");
+        const tweenShadowY = this.game.add.tween(this.shadow).to( {y: this.y + 5}, 300, "Quart.easeOut");
+        return [tweenShadowX, tweenShadowY, tweenX, tweenY]
     }
     destroy() {
-        const destroyShadow = this.parent.game.add.tween(this.shadow.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
-        const destroyGem = this.parent.game.add.tween(this.gem.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
-        destroyShadow.onComplete.add(() => {this.shadow.destroy()}, this)
-        destroyGem.onComplete.add(() => {this.gem.destroy()}, this)
-        destroyShadow.start()
-        destroyGem.start()
+        const destroyTweenShadow = this.parent.game.add.tween(this.shadow.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
+        const destroyTweenGem = this.parent.game.add.tween(this.gem.scale).to({ x: 0, y: 0}, 300, "Quart.easeOut")
+        return [destroyTweenShadow, destroyTweenGem]
     }
     spawn() {
-        this.shadow.position.y = 0
-        this.gem.position.y = 0
-        const spawnShadow = this.parent.game.add.tween(this.shadow).to({ y: this.y + 5}, 1100, "Quart.easeOut")
-        const spawnGem = this.parent.game.add.tween(this.gem).to({ y: this.y }, 1100, "Quart.easeOut")
-        spawnShadow.start()
-        spawnGem.start()
-        return this
+        const spawnTweenShadow = this.parent.game.add.tween(this.shadow).from({ y: 5}, 300, "Quint.easeOut", true)
+        const spawnTweenGem = this.parent.game.add.tween(this.gem).from({ y: 0}, 300, "Quint.easeOut", true)
+        return [spawnTweenShadow, spawnTweenGem]
     }
 }

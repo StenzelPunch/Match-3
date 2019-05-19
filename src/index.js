@@ -2,52 +2,55 @@ window.PIXI   = require('phaser-ce/build/custom/pixi');
 window.p2     = require('phaser-ce/build/custom/p2');
 window.Phaser = require('phaser-ce/build/custom/phaser-split');
 
-import bg from './assets/images/backgrounds/background.jpg';
-import gems from './assets/donuts'
-import point from './assets/images/particles/particle_ex1.png'
-import shadow from './assets/images/game/shadow.png'
-import GemGrid from './assets/GemsGrid'
+import gridConfig from './assets/gridConfig'
 
-const Width = 480;
-const Height = 720;
-const TopBarHeight = 120;
 
-const game = new Phaser.Game(Width, Height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-const state = new Phaser.StateManager(game)
+import Preload from './scenes/Preload'
+import StartScreen from './scenes/StartScreen'
+import Game from './scenes/Game'
+import GameOver from './scenes/GameOver'
 
+
+let Width
+let Height
+
+if (window.innerWidth > 480) {
+    Width = 480
+} else {
+    Width = window.innerWidth
+}
+if (window.innerHeight > 960) {
+    Height = 960
+} else {
+    Height = window.innerHeight
+}
+
+const TopBarHeight = Height * .25;
 const gemsImaegs = []
 
-state.rows = 7;
-state.colls = 7;
-state.images = gemsImaegs;
-state.topBarHeight = TopBarHeight;
-state.gridWidth = Width;
-state.gridHeight = Height - TopBarHeight;
-state.selectedGem = null;
+const game = new Phaser.Game(Width, Height, Phaser.WEBGL, '');
 
-
-function preload() {
-    game.load.image('bg', bg);
-    game.load.image('shadow', shadow);
-    game.load.image('point', point);
-
-    for (let gem in gems) {
-        game.load.image('gem-0' + gem, gems[gem])
-        gemsImaegs.push('gem-0' + gem)
+WebFont.load({
+    google: {
+      families: ['Fredoka One']
     }
+});
 
-}
+gridConfig.rows = 7;
+gridConfig.cols = 7;
+gridConfig.images = gemsImaegs;
+gridConfig.gameWidth = Width;
+gridConfig.gameHeight = Height;
+gridConfig.gridWidth = Width;
+gridConfig.gridHeight = Height - TopBarHeight;
+gridConfig.topBarHeight = TopBarHeight;
+gridConfig.selectedGem = null;
+gridConfig.game = game
 
-function create() {
-    const background = game.add.sprite(Width, TopBarHeight, 'bg');
 
-    background.scale.setTo(0.61, 0.67);
-    background.angle += 90;
-    const grid = new GemGrid(game, state)
-    state.grid = grid;
-}
+game.state.add('preload', Preload);
+game.state.add('start-screen', StartScreen);
+game.state.add('game', Game);
+game.state.add('game-over', GameOver);
 
-function update() {
-    const grid = state.grid
-
-}
+game.state.start('preload');
