@@ -26,7 +26,6 @@ if (window.innerHeight > 960) {
 }
 
 const TopBarHeight = Height * .25;
-const gemsImaegs = []
 
 const game = new Phaser.Game(Width, Height, Phaser.WEBGL, '');
 
@@ -38,7 +37,6 @@ WebFont.load({
 
 gridConfig.rows = 7;
 gridConfig.cols = 7;
-gridConfig.images = gemsImaegs;
 gridConfig.gameWidth = Width;
 gridConfig.gameHeight = Height;
 gridConfig.gridWidth = Width;

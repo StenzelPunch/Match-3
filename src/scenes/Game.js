@@ -12,7 +12,7 @@ const Game = class Game {
         this.timerStarted = false;
     }
     create() {
-        const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'bg');
+        const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'background');
         background.height = gridConfig.gameHeight;
         background.scale.x = background.scale.y
         background.anchor.set(0.5)
