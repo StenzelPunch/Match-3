@@ -39,10 +39,11 @@ export default class SingleGem {
         donut.inputEnabled = true;
         donut.data = this
         donut.anchor.set(0.5)
-        donut.scale.set(this.gridConfig.scale)
+        donut.width = this.gridConfig.gameWidth / this.gridConfig.rows + 5;
+        donut.scale.y = donut.scale.x
         donut.events.onInputDown.add(this.startLine, this)
         this.game.input.onUp.add(this.outLine, this)
-
+        donut.events.onInputDown.add(this.overLine, this)
         donut.events.onInputOver.add(this.overLine, this)
         donut.events.onInputOut.add(this.overLine, this)
         donut.events.onInputUp.add(this.outLine, this)
@@ -51,9 +52,10 @@ export default class SingleGem {
 
     }
     createGemShadow () {
-        const shadow = this.game.add.sprite(this.x + 5, this.y + 5, 'shadow')
+        const shadow = this.game.add.sprite(this.x + 4, this.y + 5, 'shadow')
         shadow.anchor.set(0.5)
-        shadow.scale.set(this.gridConfig.scale)
+        shadow.width = this.gridConfig.gameWidth / this.gridConfig.rows + 5;
+        shadow.scale.y = shadow.scale.x
         shadow.data = this
         return shadow
     }
@@ -72,10 +74,12 @@ export default class SingleGem {
                     if (line[line.length -1].gem.key == e.key) {
                         if(!isSameInline(e.data, line)) {
                             line.push(e.data)
+                            this.playSound(line.length)
                         }
                     } else if (isSpecial(e)) {
                         if(!isSameInline(e.data, line)) {
                             line.unshift(e.data)
+                            this.playSound(line.length)
                         }
                     }
                 }
@@ -89,6 +93,13 @@ export default class SingleGem {
             this.grid.destroyMatches(this.grid.line)
         }
         this.grid.line = []
+    }
+    playSound(length) {
+        if (length <= 9) {
+            this.game.add.sound(`select_${length}`).play()
+        } else {
+            this.game.add.sound(`select_9`).play()
+        }
     }
     swap() {
         const tweenX = this.game.add.tween(this.gem).to( {x: this.x}, 300, "Quart.easeOut");
