@@ -11,23 +11,17 @@ import Game from './scenes/Game'
 import GameOver from './scenes/GameOver'
 
 
-let Width
-let Height
+let Width = 640,
+    Height = 860
 
-if (window.innerWidth > 480) {
-    Width = 480
-} else {
-    Width = window.innerWidth
+if (window.innerWidth < 640) {
+  Width = window.innerWidth
 }
-if (window.innerHeight > 960) {
-    Height = 960
-} else {
-    Height = window.innerHeight
+if (window.innerHeight < 860) {
+  Height = window.innerHeight
 }
 
-const TopBarHeight = Height * .25;
-
-const game = new Phaser.Game(Width, Height, Phaser.WEBGL, '');
+const game = new Phaser.Game(Width, Height, Phaser.CANVAS, '');
 
 WebFont.load({
     google: {
@@ -40,11 +34,18 @@ gridConfig.cols = 7;
 gridConfig.gameWidth = Width;
 gridConfig.gameHeight = Height;
 gridConfig.gridWidth = Width;
-gridConfig.gridHeight = Height - TopBarHeight;
-gridConfig.topBarHeight = TopBarHeight;
+gridConfig.gridHeight = Height -  Height * .25;
+gridConfig.topBarHeight =  Height * .25;
 gridConfig.selectedGem = null;
 gridConfig.game = game
 
+
+if (Width == 640 && Height == 860) {
+  gridConfig.scale = 1
+} else {
+  gridConfig.scale = window.devicePixelRatio * 0.2
+
+}
 
 game.state.add('preload', Preload);
 game.state.add('start-screen', StartScreen);

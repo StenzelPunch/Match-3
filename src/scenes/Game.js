@@ -14,7 +14,7 @@ const Game = class Game {
     create() {
         const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'background');
         background.height = gridConfig.gameHeight;
-        background.scale.x = background.scale.y
+        background.scale.set(gridConfig.scale * 2)
         background.anchor.set(0.5)
 
         this.grid = new GemGrid(this, gridConfig)
@@ -22,12 +22,14 @@ const Game = class Game {
         this.timeLeft = this.grid.timeLeft
         this.timer.loop(1000, this.updateTime, this);
 
-        const textScore = this.add.text(-10, 20, "Score: " + this.grid.score, this.style)
-        const textTime =  this.add.text(-10, 100, "Time left: " + this.timeLeft, this.style)
+        const textScore = this.add.text(10, 20, "Score: " + this.grid.score, this.style)
+        const textTime =  this.add.text(10, 100, "Time left: " + this.timeLeft, this.style)
 
         console.log(textScore)
         textScore.setShadow(5, 5, 'rgba(0,0,0,0.5)', 10);
         textTime.setShadow(5, 5, 'rgba(0,0,0,0.5)', 10);
+        textScore.scale.set(gridConfig.scale)
+        textTime.scale.set(gridConfig.scale)
         textScore.stroke = '#000000'
         textTime.stroke = '#000000'
         textScore.strokeThickness = 4;
@@ -54,6 +56,22 @@ const Game = class Game {
             this.timeLeft.t = 10
             this.state.start('game-over', true, false, this.grid.score)
         }
+    }
+    folow(){
+        if(this.grid.isLineStarted){
+            const particle = this.add.sprite(this.input.x,this.input.y, 'particle_5')
+            particle.anchor.set(0.5)
+            particle.alpha = 0.5
+
+            const particleTween = this.add.tween(particle.scale).to({x: 0, y: 0}, 700, "Quart.easeOut")
+            particleTween.onComplete.add(() => {
+                particle.destroy()
+
+            })
+            particleTween.start()
+
+        }
+
     }
 }
 
