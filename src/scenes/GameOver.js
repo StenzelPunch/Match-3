@@ -1,6 +1,4 @@
 import gridConfig from '../assets/gridConfig'
-import GemGrid from '../assets/GemsGrid'
-
 
 const Game = class Game {
     constructor() {
@@ -12,28 +10,31 @@ const Game = class Game {
         this.score = score
     }
     create() {
-        const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'bg');
+        const background = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'background');
         background.height = gridConfig.gameHeight;
         background.scale.x = background.scale.y
         background.anchor.set(0.5)
-        const logo = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 12, 'donuts-logo')
+
+        const logo = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 12, 'donuts_logo')
         logo.anchor.set(0.5)
         logo.scale.setTo(0.3)
-        const timeUp = this.add.sprite(gridConfig.gameWidth / 2 , gridConfig.gameHeight / 4, 'time-up')
+
+        const timeUp = this.add.sprite(gridConfig.gameWidth / 2 , gridConfig.gameHeight / 4, 'text_timeup')
         timeUp.anchor.set(0.5)
         timeUp.scale.setTo(0.8)
-        const bgScore = this.add.sprite(gridConfig.gameWidth / 2 + 10, gridConfig.gameHeight / 2, 'bg-score')
+
+        const bgScore = this.add.sprite(gridConfig.gameWidth / 2 + 10, gridConfig.gameHeight / 2, 'bg_score')
         bgScore.anchor.set(0.5)
         bgScore.scale.setTo(0.8)
+
         const scoreText = this.add.text(gridConfig.gameWidth / 2 + 10, gridConfig.gameHeight / 2 - 10, this.score, this.style)
         scoreText.anchor.set(0.5)
-        const play = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight - gridConfig.gameHeight / 4 , 'play')
+
+        const play = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight - gridConfig.gameHeight / 4 , 'btn_play')
         play.anchor.set(0.5)
         play.scale.setTo(0.7)
         play.inputEnabled = true;
         play.events.onInputDown.add(this.clickHandler, this)
-
-        console.log(this)
     }
     update() {
         if (this.playClicked) {

@@ -12,7 +12,10 @@ export default class GemsGrid {
         this.selectedGem = null;
         this.content = []
         this.score = 0
-        this.timeLeft = {t: 60}
+        this.timeLeft = {t: 45}
+        this.isLineStarted = false
+        this.line = []
+        this.scoreX2 = false
 
         for (let i = 0; i < this.rows; i++) {
             const col = [];
@@ -30,66 +33,23 @@ export default class GemsGrid {
     get partHeight() {
         return Math.floor(this.height / this.rows);
     }
-    log(){
-        console.log(this);
-    }
-    swap(e) {
-        const selected = this.selectedGem ? this.selectedGem : null
-        const selectedPos   = selected ? Object.assign({}, {col: selected.data.col, row: selected.data.row}) : null
-
-        const target = e
-        const targetPos   = Object.assign({}, {col: target.data.col, row: target.data.row})
-
-        if (!this.selectedGem) {
-            this.selectedGem = e
-            changeScaleDonut(e, 0.6)
-        } else if (doesRangeTooBig(this, selected, target)) {
-            changeScaleDonut(this.selectedGem, 0.5)
-            this.selectedGem = null
-        }  else if (this.selectedGem == e){
-            changeScaleDonut(e, 0.5)
-            this.selectedGem = null
-        } else {
-            selected.data.col = targetPos.col
-            selected.data.row  = targetPos.row
-            target.data.col = selectedPos.col
-            target.data.row = selectedPos.row
-
-
-            changePosInGrid(selected, targetPos)
-            changePosInGrid(target, selectedPos)
-            changeScaleDonut(this.selectedGem, 0.5)
-
-            const spritesToSwap = []
-            spritesToSwap.push(...selected.data.swap(), ...target.data.swap())
-            callTweens(spritesToSwap, this.searchMatch, this)
-            this.selectedGem = null
-        }
-    }
-
-    searchMatch(){
-        const array = this.content;
-        const matches = []
-        matches.push(...search(array), ...search(transpose(array)))
-
-        if (matches.length !== 0) {
-            this.destroyMatches(matches)
-            this.timeLeft.t += 2
-        }
-    }
-
     destroyMatches(matches) {
+
+        console.log()
         let spritesToDestroy = []
-        matches.forEach(group => {
-            group.forEach(single => {
-                this.content[single.row][single.col] = null
-                spritesToDestroy.push(...single.destroy())
-                this.score += 10
-            })
+        const arr = this.specGems(matches)
+        arr.forEach(single => {
+            this.content[single.row][single.col] = null
+            spritesToDestroy.push(...single.destroy())
+            this.score += arr.length * 50
+            if (this.scoreX2) {
+                this.score += arr.length * 100
+                this.scoreX2 = false
+            }
         })
         callTweens(spritesToDestroy, this.moveDown, this)
+        this.game.add.audio('kill').play()
     }
-
     moveDown() {
         const arr = this.content
         for (let r = arr.length - 1; r >= 0; r--) {
@@ -137,49 +97,61 @@ export default class GemsGrid {
                 }
             }
         }
-        callTweens(spritesToSpawn, this.searchMatch, this)
+        callTweens(spritesToSpawn, console.log, this)
     }
-}
-
-const search = array => {
-    const matches = []
-    for (let row in array) {
-        let bufer = []
-        for (let col in array[row]) {
-            if (array[row][col]) {
-                if (bufer.length > 0) {
-                    if (array[row][col] != null && array[row][col] != 'target' && bufer[bufer.length - 1].gem.key == array[row][col].gem.key) {
-                        bufer.push(array[row][col])
-                        if (col == array[row].length - 1 && bufer.length >= 3) {
-                            matches.push(bufer)
+    specGems (matches) {
+        const arr = matches
+        arr.forEach(gem => {
+            if (gem.gem.key === 'gem_07') {
+                for (let row in this.content) {
+                    for (let col in this.content[row]) {
+                        if (arr[arr.length - 1].gem.key == this.content[row][col].gem.key) {
+                            arr.push(this.content[row][col])
+                        }
+                    }
+                }
+            } else if (gem.gem.key === 'gem_08') {
+                for (let row in this.content) {
+                    if (row == gem.row) {
+                        console.log(row)
+                        for (let col in this.content[row]) {
+                            arr.push(this.content[row][col])
                         }
                     } else {
-                        if (bufer.length >= 3) {
-                            matches.push(bufer)
+                        for (let col in this.content[row]) {
+                            if (col == gem.col) {
+                                arr.push(this.content[row][col])
+                            }
                         }
-                        bufer = []
-                        bufer.push(array[row][col])
                     }
-                } else {
-                    bufer.push(array[row][col])
                 }
-            } else {
-                if (bufer.length >= 3) {
-                    matches.push(bufer)
+            } else if (gem.gem.key === 'gem_09'){
+                for (let row in this.content) {
+                    for (let col in this.content[row]) {
+                        if (col == gem.col) {
+                            arr.push(this.content[row][col])
+                        }
+                    }
                 }
-                bufer = []
+            } else if (gem.gem.key === 'gem_10') {
+                for (let row in this.content) {
+                    if (row == gem.row) {
+                        console.log(row)
+                        for (let col in this.content[row]) {
+                            arr.push(this.content[row][col])
+                        }
+                    }
+                }
+            } else if (gem.gem.key === 'gem_12') {
+                this.timeLeft.t += 5
+            } else if (gem.gem.key === 'gem_11') {
+                console.log(score)
+                this.scoreX2 = true
             }
-        }
-        bufer = []
+        })
+        console.log(arr)
+        return arr
     }
-    return matches;
-}
-
-const transpose = array => array[0].map((col, i) => array.map(row => row[i]));
-
-const changeScaleDonut = (target, x) => {
-    target.scale.setTo(x)
-    target.data.shadow.scale.setTo(x)
 }
 
 const callTweens = (tweens, callback, context) => {
@@ -193,24 +165,4 @@ const callTweens = (tweens, callback, context) => {
         }, context)
         tween.start()
     })
-}
-
-const doesRangeTooBig = (grid, oldPos, newPos) => {
-    const gapX = grid.partWidth,
-          gapY = grid.partHeight,
-          newX = newPos.position.x,
-          newY = newPos.position.y,
-          oldX = oldPos.position.x,
-          oldY = oldPos.position.y
-    if (newX === oldX + gapX && newY === oldY || newX === oldX - gapX && newY === oldY ) {
-       return false
-    } else if (newY === oldY + gapY && newX === oldX || newY === oldY - gapY && newX === oldX ) {
-        return false
-    } else {
-        return true
-    }
-}
-
-const changePosInGrid = (e, targetPos) => {
-    e.data.parent.content[targetPos.row][targetPos.col] = e.data
 }
