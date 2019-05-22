@@ -1,6 +1,7 @@
 const assets = {
     images: {
         background: require('./images/backgrounds/background.jpg'),
+        tutorial_background: require('./images/backgrounds/tutorial_background.png'),
         bg_score: require('./images/bg-score.png'),
         big_shadow: require('./images/big-shadow.png'),
         btn_play: require('./images/btn-play.png'),

@@ -7,6 +7,7 @@ import gridConfig from './assets/gridConfig'
 
 import Preload from './scenes/Preload'
 import Boot from './scenes/Boot'
+import Tutorial from './scenes/Tutorial'
 import StartScreen from './scenes/StartScreen'
 import Game from './scenes/Game'
 import GameOver from './scenes/GameOver'
@@ -49,6 +50,7 @@ if (Width == 640 && Height == 860) {
 }
 game.state.add('boot', Boot);
 game.state.add('preload', Preload);
+game.state.add('tutorial', Tutorial);
 game.state.add('start-screen', StartScreen);
 game.state.add('game', Game);
 game.state.add('game-over', GameOver);

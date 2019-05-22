@@ -35,8 +35,6 @@ export default class Preloade {
         tweenShadow.loop(true)
         tweenShadow.start()
 
-
-
         this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
 
         //load images
@@ -50,7 +48,6 @@ export default class Preloade {
             this.load.audio(`${audio}`, assets.audio[audio])
         }
         this.load.start()
-        console.log('STAGE: Preload')
     }
     update() {
         if (this.loadComplete && this.logoShown) {

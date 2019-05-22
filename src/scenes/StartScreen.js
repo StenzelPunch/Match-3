@@ -9,24 +9,28 @@ const Game = class Game {
         background.height = gridConfig.gameHeight;
         background.scale.x = background.scale.y
         background.anchor.set(0.5)
+
         const logo = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 8, 'donuts_logo')
         logo.anchor.set(0.5)
         logo.scale.setTo(0.5)
+
         const bigDonutShadow = this.add.sprite(gridConfig.gameWidth / 2 + 10, gridConfig.gameHeight / 2 + 10, 'big_shadow')
         bigDonutShadow.anchor.set(0.5)
         bigDonutShadow.scale.setTo(0.4)
+
         const bigDonut = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight / 2, 'donut')
         bigDonut.anchor.set(0.5)
         bigDonut.scale.setTo(0.4)
+
         const play = this.add.sprite(gridConfig.gameWidth / 2, gridConfig.gameHeight - gridConfig.gameHeight / 8 , 'btn_play')
         play.anchor.set(0.5)
         play.scale.setTo(0.7)
-        const musicBtn = this.add.sprite(50, gridConfig.gameHeight - gridConfig.gameHeight / 8 , 'btn_sfx')
+
+        const musicBtn = this.add.sprite(40, gridConfig.gameHeight - gridConfig.gameHeight / 8 , 'btn_sfx')
         musicBtn.anchor.set(0.5)
         musicBtn.scale.setTo(0.5)
         musicBtn.inputEnabled = true;
         musicBtn.events.onInputDown.add(this.musicBtn, this)
-
 
         play.inputEnabled = true;
         play.events.onInputDown.add(this.clickHandler, this)
@@ -41,7 +45,7 @@ const Game = class Game {
     }
     update() {
         if (this.playClicked) {
-            this.state.start('game')
+            this.state.start('tutorial')
             this.playClicked = false
         }
     }
